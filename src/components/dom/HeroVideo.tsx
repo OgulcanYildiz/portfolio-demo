@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import HeroTitle from "./HeroTitle";
 
 export default function HeroVideo() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -36,6 +37,9 @@ export default function HeroVideo() {
                     className="absolute inset-0 bg-black pointer-events-none"
                     style={{ opacity: overlayOpacity }}
                 />
+
+                {/* Hero title overlay */}
+                <HeroTitle />
             </div>
         </section>
     );
