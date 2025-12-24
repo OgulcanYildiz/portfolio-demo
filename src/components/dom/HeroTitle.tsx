@@ -6,64 +6,65 @@ import { motion, useScroll, useTransform } from "framer-motion";
 export default function HeroTitle() {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Track scroll progress of the hero container (parent)
+    // Track scroll progress of the hero container
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end start"],
     });
 
-    // SCROLL-OUT: Title moves UP and fades as user scrolls
-    // Starts at 0, moves up to -200px by 80% scroll
-    const titleY = useTransform(scrollYProgress, [0, 0.4, 0.8], [0, -80, -200]);
-    const titleOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7], [1, 0.7, 0]);
+    // TASK 1: Hero text dissolves by sinking inward + fading
+    // Slow, cinematic timing - feels absorbed into space
 
-    // SCROLL-OUT: Subtitle with slightly different timing
-    const subtitleY = useTransform(scrollYProgress, [0, 0.4, 0.8], [0, -60, -150]);
-    const subtitleOpacity = useTransform(scrollYProgress, [0, 0.35, 0.7], [1, 0.6, 0]);
+    // Title: subtle downward sink (0 → +60px) with slow fade
+    const titleY = useTransform(scrollYProgress, [0, 0.6, 1], [0, 30, 60]);
+    const titleOpacity = useTransform(scrollYProgress, [0, 0.4, 0.8], [1, 0.5, 0]);
+    const titleScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.97]);
 
-    // SCROLL-OUT: Scroll indicator fades first
-    const indicatorOpacity = useTransform(scrollYProgress, [0, 0.2, 0.4], [1, 0.5, 0]);
-    const indicatorY = useTransform(scrollYProgress, [0, 0.3], [0, -30]);
+    // Subtitle: slightly faster dissolve, same direction
+    const subtitleY = useTransform(scrollYProgress, [0, 0.5, 0.9], [0, 25, 50]);
+    const subtitleOpacity = useTransform(scrollYProgress, [0, 0.35, 0.7], [1, 0.4, 0]);
+    const subtitleScale = useTransform(scrollYProgress, [0, 0.7], [1, 0.98]);
 
-    // Subtle blur effect as content exits
-    const blur = useTransform(scrollYProgress, [0.3, 0.7], [0, 4]);
+    // Scroll indicator: first to dissolve
+    const indicatorY = useTransform(scrollYProgress, [0, 0.3], [0, 20]);
+    const indicatorOpacity = useTransform(scrollYProgress, [0, 0.15, 0.35], [1, 0.5, 0]);
 
     return (
         <motion.div
             ref={containerRef}
             className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none"
         >
-            {/* Main title - SCROLL-OUT */}
+            {/* Main title - sinks and dissolves */}
             <motion.h1
                 className="text-5xl md:text-7xl lg:text-8xl font-light text-white tracking-tight text-center"
                 style={{
                     y: titleY,
                     opacity: titleOpacity,
-                    filter: useTransform(blur, (b) => `blur(${b}px)`),
+                    scale: titleScale,
                 }}
             >
-                <motion.span className="block text-white/90">Digital</motion.span>
-                <motion.span className="block text-white/70 mt-2">Museum</motion.span>
+                <span className="block text-white/90">Digital</span>
+                <span className="block text-white/70 mt-2">Museum</span>
             </motion.h1>
 
-            {/* Subtitle - SCROLL-OUT with offset */}
+            {/* Subtitle - sinks and dissolves */}
             <motion.p
                 className="mt-8 text-sm md:text-base text-white/40 font-light tracking-[0.3em] uppercase"
                 style={{
                     y: subtitleY,
                     opacity: subtitleOpacity,
-                    filter: useTransform(blur, (b) => `blur(${b * 0.8}px)`),
+                    scale: subtitleScale,
                 }}
             >
                 A Curated Experience
             </motion.p>
 
-            {/* Scroll indicator - FIRST to fade */}
+            {/* Scroll indicator - first to dissolve */}
             <motion.div
                 className="absolute bottom-24 left-1/2 -translate-x-1/2"
                 style={{
-                    opacity: indicatorOpacity,
                     y: indicatorY,
+                    opacity: indicatorOpacity,
                 }}
             >
                 <motion.div

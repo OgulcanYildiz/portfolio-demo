@@ -1,13 +1,12 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import {
     motion,
     useScroll,
     useTransform,
     useSpring,
-    useMotionValue,
 } from "framer-motion";
 import type { Project } from "@/lib/data";
 
@@ -17,12 +16,10 @@ interface ProjectCardProps {
     totalItems: number;
 }
 
-// Motion springs
+// Motion springs - smooth, cinematic
 const positionSpring = { stiffness: 50, damping: 40, restDelta: 0.001 };
 const opacitySpring = { stiffness: 30, damping: 50, restDelta: 0.001 };
-const hoverSpring = { stiffness: 200, damping: 25, restDelta: 0.001 };
-
-const CYLINDER_RADIUS = 300;
+const hoverSpring = { stiffness: 300, damping: 30, restDelta: 0.001 };
 
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(false);
@@ -44,43 +41,9 @@ export default function ProjectCard({
     const isMobile = useIsMobile();
     const [isHovered, setIsHovered] = useState(false);
 
-    // Mouse position for tilt
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-    const smoothMouseX = useSpring(mouseX, hoverSpring);
-    const smoothMouseY = useSpring(mouseY, hoverSpring);
-
-    const handleMouseMove = useCallback(
-        (e: React.MouseEvent<HTMLDivElement>) => {
-            if (!cardRef.current || isMobile) return;
-            const rect = cardRef.current.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width;
-            const y = (e.clientY - rect.top) / rect.height;
-            mouseX.set((x - 0.5) * 2);
-            mouseY.set((y - 0.5) * 2);
-        },
-        [mouseX, mouseY, isMobile]
-    );
-
-    const handleMouseEnter = () => setIsHovered(true);
-    const handleMouseLeave = () => {
-        setIsHovered(false);
-        mouseX.set(0);
-        mouseY.set(0);
-    };
-
-    // STRONGER HOVER: ±6-8° tilt, clearly visible
-    const hoverRotateX = useTransform(smoothMouseY, [-1, 1], [8, -8]);
-    const hoverRotateY = useTransform(smoothMouseX, [-1, 1], [-8, 8]);
-
-    // STRONGER HOVER: +80px Z depth
-    const hoverZ = useSpring(isHovered ? 80 : 0, hoverSpring);
-
-    // STRONGER HOVER: 1.15× brightness
-    const hoverBrightness = useSpring(isHovered ? 1.15 : 1, hoverSpring);
-
-    // STRONGER HOVER: visible scale on hover
-    const hoverScale = useSpring(isHovered ? 1.05 : 1, hoverSpring);
+    // TASK 4: Professional hover - subtle scale + shadow, no 3D
+    const hoverScale = useSpring(isHovered ? 1.03 : 1, hoverSpring);
+    const hoverBrightness = useSpring(isHovered ? 1.08 : 1, hoverSpring);
 
     const { scrollYProgress } = useScroll({
         target: cardRef,
@@ -90,29 +53,17 @@ export default function ProjectCard({
     const smoothProgress = useSpring(scrollYProgress, positionSpring);
     const opacityProgress = useSpring(scrollYProgress, opacitySpring);
 
-    // Cylinder calculations
-    const baseAngleOffset = (index / totalItems) * Math.PI * 0.5;
-    const angle = useTransform(smoothProgress, [0, 0.5, 1], [
-        baseAngleOffset + Math.PI * 0.4,
-        baseAngleOffset,
-        baseAngleOffset - Math.PI * 0.4,
-    ]);
+    // Horizontal offset based on index (alternating left/right)
+    const isEven = index % 2 === 0;
+    const xOffset = useTransform(
+        smoothProgress,
+        [0, 0.5, 1],
+        isEven
+            ? [isMobile ? -30 : -80, 0, isMobile ? 30 : 80]
+            : [isMobile ? 30 : 80, 0, isMobile ? -30 : -80]
+    );
 
-    const cylinderX = useTransform(angle, (a) => {
-        const amplitude = isMobile ? 60 : 150;
-        return Math.sin(a) * amplitude;
-    });
-
-    const cylinderZ = useTransform(angle, (a) => {
-        const radius = isMobile ? CYLINDER_RADIUS * 0.5 : CYLINDER_RADIUS;
-        return (Math.cos(a) - 1) * radius * 0.5;
-    });
-
-    const baseRotateY = useTransform(angle, (a) => {
-        const maxRotation = isMobile ? 15 : 25;
-        return -Math.sin(a) * maxRotation;
-    });
-
+    // Vertical parallax
     const parallaxMultiplier = 1 + (index % 3) * 0.08;
     const yOffset = useTransform(
         smoothProgress,
@@ -120,80 +71,59 @@ export default function ProjectCard({
         [40 * parallaxMultiplier, -40 * parallaxMultiplier]
     );
 
-    // ENHANCED FOCUS: stronger scale difference
-    const baseScale = useTransform(cylinderZ, [-CYLINDER_RADIUS * 0.5, 0], [0.75, 1]);
-
-    // ENHANCED FOCUS: much stronger opacity contrast
-    const baseOpacity = useTransform(
-        opacityProgress,
-        [0, 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 0.9, 1],
-        [0.1, 0.2, 0.4, 0.7, 1, 0.7, 0.4, 0.2, 0.1]
-    );
-
-    const depthOpacity = useTransform(
-        cylinderZ,
-        [-CYLINDER_RADIUS * 0.5, -CYLINDER_RADIUS * 0.2, 0],
-        [0.4, 0.7, 1]
-    );
-
-    const combinedOpacity = useTransform(
-        [baseOpacity, depthOpacity],
-        ([base, depth]) => (base as number) * (depth as number)
-    );
-
-    const opacity = useSpring(combinedOpacity, opacitySpring);
-
-    // ENHANCED FOCUS: stronger darkness overlay for non-centered cards
-    const overlayOpacity = useTransform(
+    // Scale based on scroll position (center = larger)
+    const baseScale = useTransform(
         opacityProgress,
         [0, 0.3, 0.5, 0.7, 1],
-        [0.8, 0.4, 0, 0.4, 0.8]
+        [0.92, 0.96, 1, 0.96, 0.92]
     );
 
-    // Z-INDEX: Cards closer to front get higher z-index for clickability
-    const zIndexValue = useTransform(cylinderZ, [-CYLINDER_RADIUS * 0.5, 0], [0, 10]);
+    // Opacity: smooth entry/exit
+    const opacity = useTransform(
+        opacityProgress,
+        [0, 0.15, 0.4, 0.6, 0.85, 1],
+        [0.2, 0.5, 1, 1, 0.5, 0.2]
+    );
+
+    // Darkness overlay for non-centered cards
+    const overlayOpacity = useTransform(
+        opacityProgress,
+        [0, 0.35, 0.5, 0.65, 1],
+        [0.6, 0.2, 0, 0.2, 0.6]
+    );
 
     return (
         <motion.div
             ref={cardRef}
             className="relative w-72 h-80 md:w-80 md:h-96 cursor-pointer"
-            onMouseMove={handleMouseMove}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             style={{
-                x: cylinderX,
+                x: xOffset,
                 y: yOffset,
-                z: cylinderZ,
-                rotateY: baseRotateY,
                 scale: baseScale,
                 opacity,
-                transformStyle: "preserve-3d",
-                zIndex: zIndexValue,
-                // CRITICAL: Ensure pointer events work
-                pointerEvents: "auto",
             }}
         >
-            {/* Inner card with hover transforms */}
+            {/* Card with hover transforms */}
             <motion.div
                 className="absolute inset-0"
                 style={{
-                    rotateX: isMobile ? 0 : hoverRotateX,
-                    rotateY: isMobile ? 0 : hoverRotateY,
-                    z: hoverZ,
                     scale: hoverScale,
-                    transformStyle: "preserve-3d",
                 }}
             >
                 <Link
                     href={`/works/${project.slug}`}
                     className="block absolute inset-0 rounded-xl overflow-hidden"
-                    style={{ transformStyle: "preserve-3d" }}
                 >
-                    {/* Card background with brightness */}
+                    {/* Card background with hover brightness */}
                     <motion.div
-                        className="absolute inset-0 bg-zinc-900"
+                        className="absolute inset-0 bg-zinc-900 rounded-xl overflow-hidden transition-shadow duration-500"
                         style={{
                             filter: useTransform(hoverBrightness, (b) => `brightness(${b})`),
+                            boxShadow: isHovered
+                                ? "0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1)"
+                                : "0 10px 30px -10px rgba(0, 0, 0, 0.5)",
                         }}
                     >
                         {/* Thumbnail */}
@@ -215,13 +145,11 @@ export default function ProjectCard({
                             style={{ opacity: overlayOpacity }}
                         />
 
-                        {/* STRONGER HOVER GLOW */}
+                        {/* Hover highlight */}
                         <motion.div
-                            className="absolute inset-0 pointer-events-none"
+                            className="absolute inset-0 pointer-events-none bg-white/0 transition-colors duration-300"
                             style={{
-                                opacity: useSpring(isHovered ? 1 : 0, hoverSpring),
-                                background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%)",
-                                boxShadow: "inset 0 0 40px rgba(255,255,255,0.15)",
+                                backgroundColor: isHovered ? "rgba(255,255,255,0.03)" : "transparent",
                             }}
                         />
                     </motion.div>
@@ -240,15 +168,6 @@ export default function ProjectCard({
                     <div className="absolute top-3 right-3 md:top-4 md:right-4 text-[10px] md:text-xs text-zinc-500/60 font-mono z-10">
                         {project.id}
                     </div>
-
-                    {/* VISIBLE BORDER ON HOVER */}
-                    <motion.div
-                        className="absolute inset-0 rounded-xl pointer-events-none"
-                        style={{
-                            opacity: useSpring(isHovered ? 1 : 0, hoverSpring),
-                            border: "1px solid rgba(255,255,255,0.2)",
-                        }}
-                    />
                 </Link>
             </motion.div>
         </motion.div>
