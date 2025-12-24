@@ -102,6 +102,20 @@ export default function ProjectCard({
                             />
                         </motion.div>
 
+                        {/* TASK: Ethereal Hover Glow 
+                Behind the main card content, we add a blurred aura.
+            */}
+                        <motion.div
+                            className="absolute -inset-4 rounded-3xl z-[-1]"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: isHovered ? 0.6 : 0 }}
+                            transition={{ duration: 0.3 }}
+                            style={{
+                                background: "radial-gradient(circle at center, rgba(255,255,255,0.15), transparent 70%)",
+                                filter: "blur(20px)",
+                            }}
+                        />
+
                         {/* Card content */}
                         <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 z-10">
                             <p className="text-[10px] md:text-xs text-zinc-400 font-light tracking-[0.2em] uppercase mb-2">

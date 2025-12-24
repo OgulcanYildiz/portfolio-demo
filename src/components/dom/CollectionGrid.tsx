@@ -106,8 +106,17 @@ function HelixScene({
 
         const currentProgress = scrollProgress.current;
 
+        // TASK: Fluid Exit 
+        // We want the last card to exit the top of the viewport.
+        // Viewport height in 3D units at z=0 (approx) for FOV 35 @ distance 18 is ~12 units.
+        const VIEWPORT_HEIGHT_3D = 12;
+
+        // Total travel needs to cover the Helix Height PLUS the viewport height so it clears.
+        // Adding extra buffer to be safe.
+        const TOTAL_TRAVEL = TOTAL_HEIGHT + VIEWPORT_HEIGHT_3D + 5;
+
         // Move up
-        const targetY = currentProgress * (TOTAL_HEIGHT - SPACING_Y * 2);
+        const targetY = currentProgress * TOTAL_TRAVEL;
         const startY = -TOTAL_HEIGHT / 2 + (isMobile ? 2 : 5);
         groupRef.current.position.y = startY + targetY;
 
@@ -125,15 +134,7 @@ function HelixScene({
             const z = Math.sin(angle) * RADIUS;
             const y = -i * SPACING_Y;
 
-            // TASK: Fix "Mirrored" look
-            // Previous: -angle - Math.PI / 2
-            // If the card is facing "in", we see the backface which might be mirrored?
-            // Let's rotate it to face OUT + 90deg offset correction if needed.
-            // Usually facing center is: Math.atan2(x, z) ...
-            // Let's try flipping the rotation 180deg from previous.
-
-            // Previous: const rotY = -angle - Math.PI / 2;
-            // New: Add PI to flip it around Y axis
+            // TASK: Fix "Mirrored" look (flipped 180deg)
             const rotY = -angle + Math.PI / 2;
 
             return {
@@ -146,16 +147,20 @@ function HelixScene({
     }, [projects, RADIUS, SPACING_Y, ANGLE_STEP]);
 
     return (
-        <group ref={groupRef}>
-            {cardData.map((data, i) => (
-                <ProjectCardWrapper
-                    key={data.id}
-                    data={data}
-                    scrollProgress={scrollProgress}
-                    index={i}
-                />
-            ))}
-        </group>
+        <>
+            <group ref={groupRef}>
+                {cardData.map((data, i) => (
+                    <ProjectCardWrapper
+                        key={data.id}
+                        data={data}
+                        scrollProgress={scrollProgress}
+                        index={i}
+                    />
+                ))}
+            </group>
+            {/* TASK: Directional Warp Particles */}
+            <WarpParticles scrollProgress={scrollProgress} />
+        </>
     );
 }
 
@@ -200,4 +205,71 @@ function ProjectCardWrapper({
             />
         </group>
     )
+}
+
+function WarpParticles({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) {
+    const count = 300;
+    const mesh = useRef<THREE.Points>(null);
+    const lastScroll = useRef(0);
+
+    const [positions] = useState(() => {
+        const pos = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+            pos[i * 3] = (Math.random() - 0.5) * 40; // x
+            pos[i * 3 + 1] = (Math.random() - 0.5) * 60; // y
+            pos[i * 3 + 2] = (Math.random() - 0.5) * 40; // z
+        }
+        return pos;
+    });
+
+    useFrame((state, delta) => {
+        if (!mesh.current) return;
+
+        const currentScroll = scrollProgress.current;
+        const scrollDelta = currentScroll - lastScroll.current;
+        lastScroll.current = currentScroll;
+
+        // Direction multiplier: 
+        // If scrolling down (delta > 0), stars move UP (+Y)
+        // If scrolling up (delta < 0), stars move DOWN (-Y)
+        const velocity = scrollDelta * 80;
+
+        const positionsAttr = mesh.current.geometry.attributes.position as THREE.BufferAttribute;
+
+        for (let i = 0; i < count; i++) {
+            let y = positionsAttr.getY(i);
+
+            // Move particles: Default small drift + velocity
+            y += 0.02 + velocity;
+
+            // Infinite Recycle
+            if (y > 30) y = -30;
+            if (y < -30) y = 30;
+
+            positionsAttr.setY(i, y);
+        }
+
+        positionsAttr.needsUpdate = true;
+    });
+
+    return (
+        <points ref={mesh}>
+            <bufferGeometry>
+                <bufferAttribute
+                    attach="attributes-position"
+                    count={count}
+                    array={positions}
+                    itemSize={3}
+                    args={[positions, 3]}
+                />
+            </bufferGeometry>
+            <pointsMaterial
+                size={0.15}
+                color="#ffffff"
+                transparent
+                opacity={0.4}
+                sizeAttenuation={true}
+            />
+        </points>
+    );
 }
