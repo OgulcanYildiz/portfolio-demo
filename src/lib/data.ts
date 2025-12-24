@@ -89,6 +89,86 @@ export const projects: Project[] = [
         description:
             "Time made visible. These works compress and expand temporal experience, revealing the elasticity of moments.",
     },
+    {
+        id: "09",
+        slug: "neon-horizons",
+        title: "Neon Horizons",
+        category: "Showcase",
+        year: "2021",
+        thumbnail: "/thumbnails/01.jpg",
+        description:
+            "A study of artificial light in natural spaces. Where the digital glow meets the organic dark.",
+    },
+    {
+        id: "10",
+        slug: "chrome-echo",
+        title: "Chrome Echo",
+        category: "Collection",
+        year: "2021",
+        thumbnail: "/thumbnails/02.jpg",
+        description:
+            "Reflections upon reflections. An infinite regress of metallic surfaces exploring the concept of the self.",
+    },
+    {
+        id: "11",
+        slug: "liquid-metal",
+        title: "Liquid Metal",
+        category: "Detail",
+        year: "2021",
+        thumbnail: "/thumbnails/03.jpg",
+        description:
+            "Fluid dynamics frozen in time. The moment of transition between solid and liquid states.",
+    },
+    {
+        id: "12",
+        slug: "digital-artifacts",
+        title: "Digital Artifacts",
+        category: "Showcase",
+        year: "2020",
+        thumbnail: "/thumbnails/04.jpg",
+        description:
+            "Errors as aesthetic. Celebrating the glitch, the noise, and the unintended beauty of corruption.",
+    },
+    {
+        id: "13",
+        slug: "glass-constructs",
+        title: "Glass Constructs",
+        category: "Collection",
+        year: "2020",
+        thumbnail: "/thumbnails/05.jpg",
+        description:
+            "Transparency and distortion. Viewing the world through manufactured lenses.",
+    },
+    {
+        id: "14",
+        slug: "prism-depth",
+        title: "Prism Depth",
+        category: "Detail",
+        year: "2020",
+        thumbnail: "/thumbnails/06.jpg",
+        description:
+            "Refraction of light through complex geometries. Splitting white light into its emotional spectrum.",
+    },
+    {
+        id: "15",
+        slug: "velvet-void",
+        title: "Velvet Void",
+        category: "Showcase",
+        year: "2019",
+        thumbnail: "/thumbnails/07.jpg",
+        description:
+            "Texture in the absence of light. A tactile exploration of absolute darkness.",
+    },
+    {
+        id: "16",
+        slug: "carbon-cycle",
+        title: "Carbon Cycle",
+        category: "Collection",
+        year: "2019",
+        thumbnail: "/thumbnails/08.jpg",
+        description:
+            "From dust to structure and back again. The cyclical nature of form in a digital age.",
+    },
 ];
 
 // Helper to find project by slug

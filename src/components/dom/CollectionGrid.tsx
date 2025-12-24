@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, useState } from "react";
+import { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useScroll, useMotionValueEvent, motion, useTransform, useSpring, useMotionValue } from "framer-motion";
 import * as THREE from "three";
@@ -41,14 +41,32 @@ export default function CollectionGrid() {
     const headerOpacity = useTransform(headerProgress, [0, 0.4, 1], [0, 0.5, 1]);
     const headerY = useTransform(headerProgress, [0, 1], [30, 0]);
 
+    // TASK: Canvas Opacity for Smooth Entry
+    // Fade in the 3D scene as we scroll past the hero video
+    const sceneOpacity = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+
     return (
-        <div ref={containerRef} className="relative h-[400vh] bg-black" onMouseMove={(e) => {
+        // TASK: Negative Margin Overlap
+        // Pull the entire section up by 30vh to overlap the Hero video
+        // Remove bg-black so the video shows through the top transparent part
+        <div ref={containerRef} className="relative h-[400vh] -mt-[30vh] z-10" onMouseMove={(e) => {
             mouseX.set(e.clientX / window.innerWidth);
         }}>
+            {/* TASK: Magic Cursor Effect */}
+            <MagicCursor />
+
             <div className="sticky top-0 h-screen w-full overflow-hidden">
 
-                {/* TASK: Restore Collection Header Overlay */}
-                <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none">
+                {/* TASK: Smooth Transition Gradient Backdrop
+                    Instead of a simple top mask, this MAIN background ensures:
+                    1. Top is transparent (video visible underneath)
+                    2. Middle blends to black
+                    3. Bottom is solid black (Collection background)
+                */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/90 to-black pointer-events-none -z-10" />
+
+                {/* TASK: Restore Collection Header Overlay (z-20 to sit above gradient) */}
+                <div className="absolute top-0 left-0 right-0 z-20 pointer-events-none">
                     <motion.div
                         ref={headerRef}
                         className="max-w-7xl mx-auto px-8 pt-32 relative text-center"
@@ -68,18 +86,48 @@ export default function CollectionGrid() {
                     </motion.div>
                 </div>
 
-                <Canvas
-                    camera={{ position: [0, 0, 18], fov: 35 }}
-                    gl={{ antialias: true, alpha: false }}
-                    dpr={[1, 1.5]}
-                >
-                    <color attach="background" args={["#000000"]} />
-                    <fog attach="fog" args={["#000000", 12, 28]} />
+                <motion.div style={{ opacity: sceneOpacity }} className="w-full h-full">
+                    <Canvas
+                        camera={{ position: [0, 0, 18], fov: 35 }}
+                        gl={{ antialias: true, alpha: false }}
+                        dpr={[1, 1.5]}
+                    >
+                        <color attach="background" args={["#000000"]} />
+                        <fog attach="fog" args={["#000000", 12, 28]} />
 
-                    <HelixScene scrollProgress={scrollProgress} />
-                </Canvas>
+                        <HelixScene scrollProgress={scrollProgress} />
+                    </Canvas>
+                </motion.div>
             </div>
         </div>
+    );
+}
+
+// TASK: Magic Cursor Component
+function MagicCursor() {
+    const mouseX = useMotionValue(-100);
+    const mouseY = useMotionValue(-100);
+
+    useEffect(() => {
+        const move = (e: MouseEvent) => {
+            mouseX.set(e.clientX - 128); // Center the 256px glow
+            mouseY.set(e.clientY - 128);
+        }
+        window.addEventListener("mousemove", move);
+        return () => window.removeEventListener("mousemove", move);
+    }, [mouseX, mouseY]);
+
+    const springConfig = { damping: 25, stiffness: 150, mass: 0.5 };
+    const x = useSpring(mouseX, springConfig);
+    const y = useSpring(mouseY, springConfig);
+
+    return (
+        <motion.div
+            className="fixed top-0 left-0 w-64 h-64 pointer-events-none z-50 mix-blend-screen"
+            style={{ x, y }}
+        >
+            <div className="w-full h-full bg-white/10 rounded-full blur-3xl opacity-40" />
+        </motion.div>
     );
 }
 

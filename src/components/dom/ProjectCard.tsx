@@ -52,8 +52,8 @@ export default function ProjectCard({
                     pointerEvents: opacity < 0.3 ? "none" : "auto", // Disable interaction if too deep
                 }}
                 // Add a slight scaling factor for better resolution
-                // Reduced by 30% per user request: Mobile 0.4*0.7=0.28, Desktop 1*0.7=0.7
-                scale={isMobile ? 0.28 : 0.7}
+                // Reduced by another 50% (Total ~35% of original): Mobile 0.14, Desktop 0.35
+                scale={isMobile ? 0.14 : 0.35}
             >
                 <motion.div
                     className="relative w-72 h-80 md:w-80 md:h-96 cursor-pointer select-none"
