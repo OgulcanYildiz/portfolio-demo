@@ -44,12 +44,6 @@ export default function ProjectCard({
     const isMobile = useIsMobile();
     const [isHovered, setIsHovered] = useState(false);
 
-    // TASK 3: Apply unified rotation from parent (very subtle per card)
-    // Each card gets a fraction of the total rotation for variety
-    const cardRotation = rotationProgress
-        ? useTransform(rotationProgress, (r) => r * 0.02 * ((index % 3) - 1))
-        : undefined;
-
     // Hover effects
     const hoverScale = useSpring(isHovered ? 1.03 : 1, hoverSpring);
     const hoverBrightness = useSpring(isHovered ? 1.08 : 1, hoverSpring);
@@ -62,14 +56,25 @@ export default function ProjectCard({
     const smoothProgress = useSpring(scrollYProgress, positionSpring);
     const opacityProgress = useSpring(scrollYProgress, opacitySpring);
 
-    // Horizontal offset (alternating)
+    // STRATEGY A: Alternating X offset (existing zig-zag pattern)
     const isEven = index % 2 === 0;
+    const amplitude = isMobile ? 50 : 100;
     const xOffset = useTransform(
         smoothProgress,
         [0, 0.5, 1],
         isEven
-            ? [isMobile ? -30 : -80, 0, isMobile ? 30 : 80]
-            : [isMobile ? 30 : 80, 0, isMobile ? -30 : -80]
+            ? [-amplitude, 0, amplitude]
+            : [amplitude, 0, -amplitude]
+    );
+
+    // STRATEGY A: Replace rotateZ with rotateY for 3D depth illusion
+    // Cards tilt toward/away from viewer as they move left/right
+    const rotationDirection = isEven ? 1 : -1;
+    const maxRotateY = isMobile ? 12 : 20; // Degrees - reduced on mobile for readability
+    const spiralRotateY = useTransform(
+        smoothProgress,
+        [0, 0.5, 1],
+        [-maxRotateY * rotationDirection, 0, maxRotateY * rotationDirection]
     );
 
     // Vertical parallax
@@ -84,21 +89,21 @@ export default function ProjectCard({
     const baseScale = useTransform(
         opacityProgress,
         [0, 0.3, 0.5, 0.7, 1],
-        [0.92, 0.96, 1, 0.96, 0.92]
+        [0.85, 0.92, 1, 0.92, 0.85]
     );
 
     // Opacity
     const opacity = useTransform(
         opacityProgress,
         [0, 0.15, 0.4, 0.6, 0.85, 1],
-        [0.2, 0.5, 1, 1, 0.5, 0.2]
+        [0.15, 0.5, 1, 1, 0.5, 0.15]
     );
 
     // Darkness overlay
     const overlayOpacity = useTransform(
         opacityProgress,
         [0, 0.35, 0.5, 0.65, 1],
-        [0.6, 0.2, 0, 0.2, 0.6]
+        [0.7, 0.3, 0, 0.3, 0.7]
     );
 
     return (
@@ -112,8 +117,9 @@ export default function ProjectCard({
                 y: yOffset,
                 scale: baseScale,
                 opacity,
-                // TASK 3: Apply subtle rotateZ
-                rotate: cardRotation,
+                // STRATEGY A: rotateY creates 3D depth illusion (card turns toward/away)
+                rotateY: spiralRotateY,
+                transformStyle: "preserve-3d",
             }}
         >
             {/* Card with hover transforms */}

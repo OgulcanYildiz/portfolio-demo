@@ -122,9 +122,15 @@ export default function CollectionGrid() {
             <motion.div
                 ref={cardsContainerRef}
                 className="relative px-8 pb-32"
-                style={{ x: ambientOffsetX }}
+                style={{
+                    x: ambientOffsetX,
+                    perspective: 1200,
+                }}
             >
-                <div className="relative flex flex-col items-center gap-24 w-full">
+                <div
+                    className="relative flex flex-col items-center gap-24 w-full"
+                    style={{ transformStyle: "preserve-3d" }}
+                >
                     {projects.map((project, index) => (
                         <ProjectCard
                             key={project.id}
