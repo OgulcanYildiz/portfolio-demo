@@ -2,25 +2,19 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import {
-    motion,
-    useScroll,
-    useTransform,
-    useSpring,
-    MotionValue,
-} from "framer-motion";
+import { motion, useSpring, useTransform } from "framer-motion";
+import { Html } from "@react-three/drei";
+import * as THREE from "three";
 import type { Project } from "@/lib/data";
 
 interface ProjectCardProps {
     project: Project;
-    index: number;
-    totalItems: number;
-    rotationProgress?: MotionValue<number>;
+    position: [number, number, number];
+    rotation: [number, number, number];
+    opacity: number;
 }
 
-// Motion springs
-const positionSpring = { stiffness: 50, damping: 40, restDelta: 0.001 };
-const opacitySpring = { stiffness: 30, damping: 50, restDelta: 0.001 };
+// Motion springs for hover interactions
 const hoverSpring = { stiffness: 300, damping: 30, restDelta: 0.001 };
 
 function useIsMobile() {
@@ -36,155 +30,95 @@ function useIsMobile() {
 
 export default function ProjectCard({
     project,
-    index,
-    totalItems,
-    rotationProgress,
+    position,
+    rotation,
+    opacity,
 }: ProjectCardProps) {
-    const cardRef = useRef<HTMLDivElement>(null);
     const isMobile = useIsMobile();
     const [isHovered, setIsHovered] = useState(false);
 
-    // Hover effects
-    const hoverScale = useSpring(isHovered ? 1.03 : 1, hoverSpring);
-    const hoverBrightness = useSpring(isHovered ? 1.08 : 1, hoverSpring);
-
-    const { scrollYProgress } = useScroll({
-        target: cardRef,
-        offset: ["start end", "end start"],
-    });
-
-    const smoothProgress = useSpring(scrollYProgress, positionSpring);
-    const opacityProgress = useSpring(scrollYProgress, opacitySpring);
-
-    // STRATEGY A: Alternating X offset (existing zig-zag pattern)
-    const isEven = index % 2 === 0;
-    const amplitude = isMobile ? 50 : 100;
-    const xOffset = useTransform(
-        smoothProgress,
-        [0, 0.5, 1],
-        isEven
-            ? [-amplitude, 0, amplitude]
-            : [amplitude, 0, -amplitude]
-    );
-
-    // STRATEGY A: Replace rotateZ with rotateY for 3D depth illusion
-    // Cards tilt toward/away from viewer as they move left/right
-    const rotationDirection = isEven ? 1 : -1;
-    const maxRotateY = isMobile ? 12 : 20; // Degrees - reduced on mobile for readability
-    const spiralRotateY = useTransform(
-        smoothProgress,
-        [0, 0.5, 1],
-        [-maxRotateY * rotationDirection, 0, maxRotateY * rotationDirection]
-    );
-
-    // Vertical parallax
-    const parallaxMultiplier = 1 + (index % 3) * 0.08;
-    const yOffset = useTransform(
-        smoothProgress,
-        [0, 1],
-        [40 * parallaxMultiplier, -40 * parallaxMultiplier]
-    );
-
-    // Scale based on center proximity
-    const baseScale = useTransform(
-        opacityProgress,
-        [0, 0.3, 0.5, 0.7, 1],
-        [0.85, 0.92, 1, 0.92, 0.85]
-    );
-
-    // Opacity
-    const opacity = useTransform(
-        opacityProgress,
-        [0, 0.15, 0.4, 0.6, 0.85, 1],
-        [0.15, 0.5, 1, 1, 0.5, 0.15]
-    );
-
-    // Darkness overlay
-    const overlayOpacity = useTransform(
-        opacityProgress,
-        [0, 0.35, 0.5, 0.65, 1],
-        [0.7, 0.3, 0, 0.3, 0.7]
-    );
+    // Example hover spring
+    const hoverScale = useSpring(isHovered ? 1.05 : 1, hoverSpring);
+    const hoverBrightness = useSpring(isHovered ? 1.15 : 1, hoverSpring);
 
     return (
-        <motion.div
-            ref={cardRef}
-            className="relative w-72 h-80 md:w-80 md:h-96 cursor-pointer"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            style={{
-                x: xOffset,
-                y: yOffset,
-                scale: baseScale,
-                opacity,
-                // STRATEGY A: rotateY creates 3D depth illusion (card turns toward/away)
-                rotateY: spiralRotateY,
-                transformStyle: "preserve-3d",
-            }}
-        >
-            {/* Card with hover transforms */}
-            <motion.div
-                className="absolute inset-0"
-                style={{ scale: hoverScale }}
+        <group position={position} rotation={rotation}>
+            <Html
+                transform
+                occlude="blending" // Occlude when behind other objects (if visual mesh exists)
+                style={{
+                    transition: "opacity 0.2s",
+                    opacity: opacity, // Fade based on depth
+                    pointerEvents: opacity < 0.3 ? "none" : "auto", // Disable interaction if too deep
+                }}
+                // Add a slight scaling factor for better resolution
+                // Reduced by 30% per user request: Mobile 0.4*0.7=0.28, Desktop 1*0.7=0.7
+                scale={isMobile ? 0.28 : 0.7}
             >
-                <Link
-                    href={`/works/${project.slug}`}
-                    className="block absolute inset-0 rounded-xl overflow-hidden"
+                <motion.div
+                    className="relative w-72 h-80 md:w-80 md:h-96 cursor-pointer select-none"
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    style={{
+                        scale: hoverScale,
+                    }}
                 >
-                    {/* Card background */}
-                    <motion.div
-                        className="absolute inset-0 bg-zinc-900 rounded-xl overflow-hidden transition-shadow duration-500"
-                        style={{
-                            filter: useTransform(hoverBrightness, (b) => `brightness(${b})`),
-                            boxShadow: isHovered
-                                ? "0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1)"
-                                : "0 10px 30px -10px rgba(0, 0, 0, 0.5)",
-                        }}
+                    <Link
+                        href={`/works/${project.slug}`}
+                        className="block absolute inset-0 rounded-xl overflow-hidden"
+                        draggable={false}
                     >
-                        {/* Thumbnail */}
-                        <div
-                            className="absolute inset-0 bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-950"
-                            style={{
-                                backgroundImage: `url(${project.thumbnail})`,
-                                backgroundSize: "cover",
-                                backgroundPosition: "center",
-                            }}
-                        />
-
-                        {/* Ambient gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-
-                        {/* Depth darkness overlay */}
+                        {/* Card background */}
                         <motion.div
-                            className="absolute inset-0 bg-black pointer-events-none"
-                            style={{ opacity: overlayOpacity }}
-                        />
-
-                        {/* Hover highlight */}
-                        <motion.div
-                            className="absolute inset-0 pointer-events-none transition-colors duration-300"
+                            className="absolute inset-0 bg-zinc-900 rounded-xl overflow-hidden transition-shadow duration-500"
                             style={{
-                                backgroundColor: isHovered ? "rgba(255,255,255,0.03)" : "transparent",
+                                filter: useTransform(hoverBrightness, (b) => `brightness(${b})`),
+                                boxShadow: isHovered
+                                    ? "0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1)"
+                                    : "0 10px 30px -10px rgba(0, 0, 0, 0.5)",
                             }}
-                        />
-                    </motion.div>
+                        >
+                            {/* Thumbnail */}
+                            <div
+                                className="absolute inset-0 bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-950"
+                                style={{
+                                    backgroundImage: `url(${project.thumbnail})`,
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                }}
+                            />
 
-                    {/* Card content */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 z-10">
-                        <p className="text-[10px] md:text-xs text-zinc-400 font-light tracking-[0.2em] uppercase mb-2">
-                            {project.category} — {project.year}
-                        </p>
-                        <h3 className="text-lg md:text-xl font-light text-white tracking-tight leading-snug">
-                            {project.title}
-                        </h3>
-                    </div>
+                            {/* Ambient gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
-                    {/* Index indicator */}
-                    <div className="absolute top-3 right-3 md:top-4 md:right-4 text-[10px] md:text-xs text-zinc-500/60 font-mono z-10">
-                        {project.id}
-                    </div>
-                </Link>
-            </motion.div>
-        </motion.div>
+                            {/* Hover highlight */}
+                            <motion.div
+                                className="absolute inset-0 pointer-events-none transition-colors duration-300"
+                                style={{
+                                    backgroundColor: isHovered
+                                        ? "rgba(255,255,255,0.03)"
+                                        : "transparent",
+                                }}
+                            />
+                        </motion.div>
+
+                        {/* Card content */}
+                        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 z-10">
+                            <p className="text-[10px] md:text-xs text-zinc-400 font-light tracking-[0.2em] uppercase mb-2">
+                                {project.category} — {project.year}
+                            </p>
+                            <h3 className="text-lg md:text-xl font-light text-white tracking-tight leading-snug">
+                                {project.title}
+                            </h3>
+                        </div>
+
+                        {/* Index indicator */}
+                        <div className="absolute top-3 right-3 md:top-4 md:right-4 text-[10px] md:text-xs text-zinc-500/60 font-mono z-10">
+                            {project.id}
+                        </div>
+                    </Link>
+                </motion.div>
+            </Html>
+        </group>
     );
 }
