@@ -16,6 +16,7 @@ const ambientSpring = { stiffness: 40, damping: 30, restDelta: 0.001 };
 export default function CollectionGrid() {
     const sectionRef = useRef<HTMLElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
+    const cardsContainerRef = useRef<HTMLDivElement>(null);
     const [isMounted, setIsMounted] = useState(false);
 
     const mouseX = useMotionValue(0.5);
@@ -33,36 +34,46 @@ export default function CollectionGrid() {
         return () => window.removeEventListener("mousemove", handleMouseMove);
     }, [mouseX, mouseY]);
 
-    // Section scroll for background transition
+    // Section scroll for background
     const { scrollYProgress: sectionProgress } = useScroll({
         target: sectionRef,
         offset: ["start end", "end start"],
     });
 
-    // Header scroll for title reveal
+    // TASK 2: Header scroll - overlaps with hero dissolve
+    // Starts appearing while hero is still visible (early entry)
     const { scrollYProgress: headerProgress } = useScroll({
         target: headerRef,
-        offset: ["start end", "center center"],
+        offset: ["start end", "start 40%"],
     });
 
-    // TASK 3: Smooth background transition (black → deep gray, no hard jumps)
-    // Gradual atmospheric blend with long easing
+    // TASK 3: Card rotation scroll - full section progress
+    const { scrollYProgress: rotationProgress } = useScroll({
+        target: cardsContainerRef,
+        offset: ["start end", "end start"],
+    });
+
+    // Background transition
     const backgroundColor = useTransform(
         sectionProgress,
         [0, 0.15, 0.4, 0.7, 1],
         ["#000000", "#080808", "#0f0f0f", "#121212", "#0a0a0a"]
     );
 
-    // TASK 2: Collection title reveals from depth
-    // Emerges with scale (0.96 → 1.0) and opacity, long easing
-    const headerScale = useTransform(headerProgress, [0, 0.8], [0.96, 1]);
-    const headerOpacity = useTransform(headerProgress, [0, 0.3, 0.7], [0, 0.4, 1]);
-    const headerY = useTransform(headerProgress, [0, 0.8], [40, 0]);
+    // TASK 2: Collection title crossfade with hero
+    // Scales from 0.96 → 1.0, fades in early to overlap hero dissolve
+    const headerScale = useTransform(headerProgress, [0, 1], [0.96, 1]);
+    const headerOpacity = useTransform(headerProgress, [0, 0.4, 1], [0, 0.5, 1]);
+    const headerY = useTransform(headerProgress, [0, 1], [30, 0]);
 
-    // Ambient parallax for subtle motion
+    // TASK 3: Unified card rotation (0 → 360 degrees over full scroll)
+    // Very slow and subtle, applied via context to all cards
+    const cardRotation = useTransform(rotationProgress, [0, 1], [0, 360]);
+
+    // Ambient parallax
     const ambientOffsetX = useTransform(smoothMouseX, [0, 1], [15, -15]);
 
-    // TASK 5: Star opacity tied to section scroll
+    // Star opacity
     const starsOpacity = useTransform(sectionProgress, [0, 0.15, 0.8, 1], [0.2, 0.5, 0.5, 0.2]);
 
     return (
@@ -71,7 +82,7 @@ export default function CollectionGrid() {
             className="relative min-h-screen overflow-hidden"
             style={{ backgroundColor }}
         >
-            {/* Gradient overlay for smoother transition from hero */}
+            {/* Gradient overlay for smooth transition from hero */}
             <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-black via-black/80 to-transparent pointer-events-none" />
 
             {/* Ambient background */}
@@ -88,7 +99,7 @@ export default function CollectionGrid() {
                 </motion.div>
             )}
 
-            {/* TASK 2: Collection header - reveals from depth */}
+            {/* TASK 2: Collection header - crossfades with hero */}
             <motion.div
                 ref={headerRef}
                 className="max-w-7xl mx-auto px-8 mb-24 pt-48 relative z-10"
@@ -107,8 +118,9 @@ export default function CollectionGrid() {
                 </p>
             </motion.div>
 
-            {/* Cards container */}
+            {/* TASK 3: Cards container with unified rotation */}
             <motion.div
+                ref={cardsContainerRef}
                 className="relative px-8 pb-32"
                 style={{ x: ambientOffsetX }}
             >
@@ -119,6 +131,7 @@ export default function CollectionGrid() {
                             project={project}
                             index={index}
                             totalItems={projects.length}
+                            rotationProgress={cardRotation}
                         />
                     ))}
                 </div>
@@ -127,7 +140,7 @@ export default function CollectionGrid() {
     );
 }
 
-// TASK 5: Ambient stars with subtle scroll-driven drift
+// Ambient stars with scroll drift
 function AmbientStars({
     mouseX,
     mouseY,
@@ -145,11 +158,8 @@ function AmbientStars({
         driftDirection: i % 2 === 0 ? 1 : -1,
     }));
 
-    // Subtle mouse parallax
     const layer1X = useTransform(mouseX, [0, 1], [20, -20]);
     const layer1Y = useTransform(mouseY, [0, 1], [15, -15]);
-
-    // TASK 5: Scroll-driven drift for stars
     const scrollDrift = useTransform(scrollProgress, [0, 1], [0, 30]);
 
     return (
@@ -167,7 +177,6 @@ function AmbientStars({
                             top: `${star.y}%`,
                             width: star.size,
                             height: star.size,
-                            // Each star drifts slightly based on scroll
                             x: useTransform(scrollDrift, (d) => d * star.driftDirection * (star.id % 5) * 0.1),
                             y: useTransform(scrollDrift, (d) => d * ((star.id % 3) - 1) * 0.15),
                         }}
@@ -175,7 +184,6 @@ function AmbientStars({
                 ))}
             </motion.div>
 
-            {/* Noise texture */}
             <div
                 className="absolute inset-0 opacity-[0.03]"
                 style={{

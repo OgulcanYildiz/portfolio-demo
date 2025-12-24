@@ -7,6 +7,7 @@ import {
     useScroll,
     useTransform,
     useSpring,
+    MotionValue,
 } from "framer-motion";
 import type { Project } from "@/lib/data";
 
@@ -14,9 +15,10 @@ interface ProjectCardProps {
     project: Project;
     index: number;
     totalItems: number;
+    rotationProgress?: MotionValue<number>;
 }
 
-// Motion springs - smooth, cinematic
+// Motion springs
 const positionSpring = { stiffness: 50, damping: 40, restDelta: 0.001 };
 const opacitySpring = { stiffness: 30, damping: 50, restDelta: 0.001 };
 const hoverSpring = { stiffness: 300, damping: 30, restDelta: 0.001 };
@@ -36,12 +38,19 @@ export default function ProjectCard({
     project,
     index,
     totalItems,
+    rotationProgress,
 }: ProjectCardProps) {
     const cardRef = useRef<HTMLDivElement>(null);
     const isMobile = useIsMobile();
     const [isHovered, setIsHovered] = useState(false);
 
-    // TASK 4: Professional hover - subtle scale + shadow, no 3D
+    // TASK 3: Apply unified rotation from parent (very subtle per card)
+    // Each card gets a fraction of the total rotation for variety
+    const cardRotation = rotationProgress
+        ? useTransform(rotationProgress, (r) => r * 0.02 * ((index % 3) - 1))
+        : undefined;
+
+    // Hover effects
     const hoverScale = useSpring(isHovered ? 1.03 : 1, hoverSpring);
     const hoverBrightness = useSpring(isHovered ? 1.08 : 1, hoverSpring);
 
@@ -53,7 +62,7 @@ export default function ProjectCard({
     const smoothProgress = useSpring(scrollYProgress, positionSpring);
     const opacityProgress = useSpring(scrollYProgress, opacitySpring);
 
-    // Horizontal offset based on index (alternating left/right)
+    // Horizontal offset (alternating)
     const isEven = index % 2 === 0;
     const xOffset = useTransform(
         smoothProgress,
@@ -71,21 +80,21 @@ export default function ProjectCard({
         [40 * parallaxMultiplier, -40 * parallaxMultiplier]
     );
 
-    // Scale based on scroll position (center = larger)
+    // Scale based on center proximity
     const baseScale = useTransform(
         opacityProgress,
         [0, 0.3, 0.5, 0.7, 1],
         [0.92, 0.96, 1, 0.96, 0.92]
     );
 
-    // Opacity: smooth entry/exit
+    // Opacity
     const opacity = useTransform(
         opacityProgress,
         [0, 0.15, 0.4, 0.6, 0.85, 1],
         [0.2, 0.5, 1, 1, 0.5, 0.2]
     );
 
-    // Darkness overlay for non-centered cards
+    // Darkness overlay
     const overlayOpacity = useTransform(
         opacityProgress,
         [0, 0.35, 0.5, 0.65, 1],
@@ -103,20 +112,20 @@ export default function ProjectCard({
                 y: yOffset,
                 scale: baseScale,
                 opacity,
+                // TASK 3: Apply subtle rotateZ
+                rotate: cardRotation,
             }}
         >
             {/* Card with hover transforms */}
             <motion.div
                 className="absolute inset-0"
-                style={{
-                    scale: hoverScale,
-                }}
+                style={{ scale: hoverScale }}
             >
                 <Link
                     href={`/works/${project.slug}`}
                     className="block absolute inset-0 rounded-xl overflow-hidden"
                 >
-                    {/* Card background with hover brightness */}
+                    {/* Card background */}
                     <motion.div
                         className="absolute inset-0 bg-zinc-900 rounded-xl overflow-hidden transition-shadow duration-500"
                         style={{
@@ -147,7 +156,7 @@ export default function ProjectCard({
 
                         {/* Hover highlight */}
                         <motion.div
-                            className="absolute inset-0 pointer-events-none bg-white/0 transition-colors duration-300"
+                            className="absolute inset-0 pointer-events-none transition-colors duration-300"
                             style={{
                                 backgroundColor: isHovered ? "rgba(255,255,255,0.03)" : "transparent",
                             }}
