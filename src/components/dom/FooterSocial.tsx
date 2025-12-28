@@ -71,6 +71,25 @@ export default function FooterSocial() {
                     style={{ scaleX: useTransform(smoothProgress, [0.3, 0.8], [0, 1]) }}
                 />
 
+                {/* Custom Text & Copyright */}
+                <div className="mb-12 space-y-4">
+                    <motion.p
+                        className="text-sm font-medium tracking-[0.2em] text-white/60"
+                        style={{ opacity: useTransform(smoothProgress, [0.3, 0.6], [0, 1]) }}
+                    >
+                        NÖBETÇİ GRAFİKER
+                    </motion.p>
+                    <motion.a
+                        href="https://www.moniyazilim.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-xs text-white/30 hover:text-white/60 font-light tracking-[0.15em] transition-colors duration-200"
+                        style={{ opacity: useTransform(smoothProgress, [0.4, 0.7], [0, 1]) }}
+                    >
+                        © 2025 Moni Yazılım. Tüm hakları saklıdır
+                    </motion.a>
+                </div>
+
                 {/* Social icons with STRONGER hover */}
                 <div className="flex items-center justify-center gap-8 md:gap-12">
                     {socialLinks.map((social, index) => (
@@ -104,13 +123,7 @@ export default function FooterSocial() {
                     ))}
                 </div>
 
-                {/* Copyright */}
-                <motion.p
-                    className="mt-12 text-xs text-white/30 font-light tracking-[0.15em]"
-                    style={{ opacity: useTransform(smoothProgress, [0.6, 0.9], [0, 1]) }}
-                >
-                    © 2024 Digital Museum. All rights reserved.
-                </motion.p>
+
             </motion.div>
         </motion.footer>
     );

@@ -21,7 +21,7 @@ export default function HeroVideo() {
             <div className="sticky top-0 h-screen w-full overflow-hidden">
                 {/* Video element */}
                 <video
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover brightness-[0.31]"
                     autoPlay
                     loop
                     muted
@@ -32,9 +32,12 @@ export default function HeroVideo() {
                     <source src="/hero.mp4" type="video/mp4" />
                 </video>
 
-                {/* Dark shift overlay */}
+                {/* Purple tint overlay */}
+                <div className="absolute inset-0 bg-purple-900/20 mix-blend-overlay pointer-events-none" />
+
+                {/* Gradient shift overlay */}
                 <motion.div
-                    className="absolute inset-0 bg-black pointer-events-none"
+                    className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black pointer-events-none"
                     style={{ opacity: overlayOpacity }}
                 />
 

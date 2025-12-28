@@ -8,8 +8,8 @@ export default function Home() {
         <main className="bg-black text-white">
             <Navigation />
             <HeroVideo />
-            <CollectionGrid />
             <FooterSocial />
+
         </main>
     );
 }

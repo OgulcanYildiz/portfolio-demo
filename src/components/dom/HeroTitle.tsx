@@ -42,20 +42,20 @@ export default function HeroTitle() {
                     y: titleY,
                 }}
             >
-                <span className="block text-white/90">Digital</span>
-                <span className="block text-white/70 mt-2">Museum</span>
+                <span className="block text-white/90">Nöbetçi</span>
+                <span className="block text-white/70 mt-2">Grafiker</span>
             </motion.h1>
 
             {/* Subtitle - depth dissolve */}
             <motion.p
-                className="mt-8 text-sm md:text-base text-white/40 font-light tracking-[0.3em] uppercase"
+                className="mt-8 text-sm md:text-base text-white/40 font-light tracking-[0.3em]"
                 style={{
                     scale: subtitleScale,
                     opacity: subtitleOpacity,
                     y: subtitleY,
                 }}
             >
-                A Curated Experience
+                Deneyimin Tasarımla Buluştuğu Yer
             </motion.p>
 
             {/* Scroll indicator - dissolves first */}
@@ -73,7 +73,7 @@ export default function HeroTitle() {
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
                     <span className="text-[10px] text-white/30 font-light tracking-[0.2em] uppercase">
-                        Scroll
+                        Keşfet
                     </span>
                     <svg
                         className="w-4 h-4 text-white/30"

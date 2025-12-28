@@ -1,33 +1,54 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import Link from "next/link";
+import { useState } from "react";
 
 const navItems = [
-    { label: "HOME", href: "/" },
-    { label: "COLLECTIONS", href: "#collections" },
-    { label: "ABOUT", href: "#about" },
-    { label: "CONTACT", href: "#contact" },
+    { label: "ANASAYFA", href: "/" },
+    { label: "KOLEKSİYONLAR", href: "#collections" },
+    { label: "HAKKIMIZDA", href: "#about" },
+    { label: "İLETİŞİM", href: "#contact" },
 ];
 
 export default function Navigation() {
+    const [hidden, setHidden] = useState(false);
+    const { scrollY } = useScroll();
+
+    useMotionValueEvent(scrollY, "change", (latest) => {
+        const previous = scrollY.getPrevious() || 0;
+        if (latest > previous && latest > 150) {
+            setHidden(true);
+        } else {
+            setHidden(false);
+        }
+    });
+
     return (
         <motion.nav
             className="fixed top-0 left-0 right-0 z-50 px-8 py-6 md:px-12 md:py-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            variants={{
+                visible: { y: 0 },
+                hidden: { y: "-100%" },
+            }}
+            animate={hidden ? "hidden" : "visible"}
+            initial="visible"
+            transition={{ duration: 0.35, ease: "easeInOut" }}
         >
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="group relative">
-                    <motion.span
-                        className="text-sm font-light tracking-[0.3em] uppercase text-white/70 group-hover:text-white transition-colors duration-300"
-                        whileHover={{ scale: 1.02 }}
+                <Link href="/" className="group relative z-50">
+                    <motion.div
+                        whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.2 }}
+                        className="relative w-18 h-18"
                     >
-                        Studio
-                    </motion.span>
+                        <img
+                            src="/logo.png"
+                            alt="Nö Logo"
+                            className="w-full h-full object-contain"
+                        />
+                    </motion.div>
                 </Link>
 
                 {/* Navigation items */}
@@ -46,7 +67,7 @@ export default function Navigation() {
                                 <Link href={item.href} className="relative group block py-2">
                                     {/* Text with STRONGER hover */}
                                     <motion.span
-                                        className="text-xs font-light tracking-[0.2em] text-white/40 group-hover:text-white transition-colors duration-200"
+                                        className="text-xs font-light tracking-[0.2em] text-white/80 group-hover:text-white transition-colors duration-200"
                                         whileHover={{ y: -2 }}
                                         transition={{ duration: 0.2 }}
                                     >
