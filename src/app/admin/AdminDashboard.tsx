@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createProject, deleteProject } from "@/actions/projects";
+import { logout } from "@/actions/auth";
 
 interface Project {
     id: string;
@@ -63,15 +64,26 @@ export default function AdminDashboard({ initialProjects }: Props) {
                             Admin Dashboard
                         </h1>
                     </div>
-                    <button
-                        onClick={() => setIsAdding(true)}
-                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors flex items-center gap-2"
-                    >
-                        <span className="text-lg">+</span>
-                        Add Project
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsAdding(true)}
+                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                            <span className="text-lg">+</span>
+                            Add Project
+                        </button>
+                        <form action={logout}>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white/70 hover:text-white"
+                            >
+                                Logout
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </header>
+
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-6 py-8">
@@ -199,13 +211,14 @@ export default function AdminDashboard({ initialProjects }: Props) {
                             </div>
                             <div>
                                 <label className="block text-sm text-white/60 mb-2">
-                                    Image URL
+                                    Project Image
                                 </label>
                                 <input
-                                    name="imageUrl"
+                                    type="file"
+                                    name="image"
                                     required
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
-                                    placeholder="https://example.com/image.jpg"
+                                    accept="image/*"
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-purple-500 focus:outline-none transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
                                 />
                             </div>
                             <div className="flex gap-4 pt-4">

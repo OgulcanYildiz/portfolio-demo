@@ -4,18 +4,30 @@ import { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useScroll, useMotionValueEvent, motion, useTransform, useSpring, useMotionValue } from "framer-motion";
 import * as THREE from "three";
-import { projects } from "@/lib/data";
 import ProjectCard from "./ProjectCard";
 
 const ambientSpring = { stiffness: 40, damping: 30, restDelta: 0.001 };
 
-export default function CollectionGrid() {
+interface Project {
+    id: string;
+    slug: string;
+    title: string;
+    category: string;
+    year: string;
+    thumbnail: string;
+    description: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export default function CollectionGrid({ projects }: { projects: Project[] }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
     const scrollProgress = useRef(0);
 
     // Mouse parallax for header
     const mouseX = useMotionValue(0.5);
+
     const smoothMouseX = useSpring(mouseX, ambientSpring);
     const ambientOffsetX = useTransform(smoothMouseX, [0, 1], [15, -15]);
 
@@ -95,7 +107,7 @@ export default function CollectionGrid() {
                         <color attach="background" args={["#000000"]} />
                         <fog attach="fog" args={["#000000", 12, 28]} />
 
-                        <HelixScene scrollProgress={scrollProgress} />
+                        <HelixScene scrollProgress={scrollProgress} projects={projects} />
                     </Canvas>
                 </motion.div>
             </div>
@@ -133,8 +145,10 @@ function MagicCursor() {
 
 function HelixScene({
     scrollProgress,
+    projects,
 }: {
     scrollProgress: React.MutableRefObject<number>;
+    projects: Project[];
 }) {
     const groupRef = useRef<THREE.Group>(null);
     const { width } = useThree((state) => state.viewport);

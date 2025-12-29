@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client'
 
+const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 const projects = [
@@ -10,8 +10,7 @@ const projects = [
         category: "Collection",
         year: "2024",
         thumbnail: "https://picsum.photos/seed/01/600/800",
-        description:
-            "An exploration of weightless structures suspended in darkness. Forms emerge and dissolve, questioning the boundaries between presence and absence.",
+        description: "An exploration of weightless structures suspended in darkness. Forms emerge and dissolve, questioning the boundaries between presence and absence.",
     },
     {
         id: "02",
@@ -20,8 +19,7 @@ const projects = [
         category: "Showcase",
         year: "2024",
         thumbnail: "https://picsum.photos/seed/02/600/800",
-        description:
-            "Geometric compositions in muted tones. Each shape exists in quiet conversation with empty space, creating rhythms of visual silence.",
+        description: "Geometric compositions in muted tones. Each shape exists in quiet conversation with empty space, creating rhythms of visual silence.",
     },
     {
         id: "03",
@@ -30,8 +28,7 @@ const projects = [
         category: "Collection",
         year: "2023",
         thumbnail: "https://picsum.photos/seed/03/600/800",
-        description:
-            "Studies in the invisible. These works examine what lies between — the unseen forces that shape form without revealing themselves.",
+        description: "Studies in the invisible. These works examine what lies between — the unseen forces that shape form without revealing themselves.",
     },
     {
         id: "04",
@@ -40,8 +37,7 @@ const projects = [
         category: "Detail",
         year: "2023",
         thumbnail: "https://picsum.photos/seed/04/600/800",
-        description:
-            "A meditation on emptiness as composition. The void becomes the primary instrument, orchestrating moments of visual resonance.",
+        description: "A meditation on emptiness as composition. The void becomes the primary instrument, orchestrating moments of visual resonance.",
     },
     {
         id: "05",
@@ -50,8 +46,7 @@ const projects = [
         category: "Showcase",
         year: "2023",
         thumbnail: "https://picsum.photos/seed/05/600/800",
-        description:
-            "Deep blacks and glinting edges. These pieces explore the reflective nature of darkness and the dreams that emerge from it.",
+        description: "Deep blacks and glinting edges. These pieces explore the reflective nature of darkness and the dreams that emerge from it.",
     },
     {
         id: "06",
@@ -60,8 +55,7 @@ const projects = [
         category: "Collection",
         year: "2022",
         thumbnail: "https://picsum.photos/seed/06/600/800",
-        description:
-            "Light captured in stillness. A study of luminescence suspended in time, where photons become sculpture.",
+        description: "Light captured in stillness. A study of luminescence suspended in time, where photons become sculpture.",
     },
     {
         id: "07",
@@ -70,8 +64,7 @@ const projects = [
         category: "Detail",
         year: "2022",
         thumbnail: "https://picsum.photos/seed/07/600/800",
-        description:
-            "Reverberations of form across space. Each echo slightly altered, creating visual conversations between iterations.",
+        description: "Reverberations of form across space. Each echo slightly altered, creating visual conversations between iterations.",
     },
     {
         id: "08",
@@ -80,8 +73,7 @@ const projects = [
         category: "Collection",
         year: "2022",
         thumbnail: "https://picsum.photos/seed/08/600/800",
-        description:
-            "Time made visible. These works compress and expand temporal experience, revealing the elasticity of moments.",
+        description: "Time made visible. These works compress and expand temporal experience, revealing the elasticity of moments.",
     },
     {
         id: "09",
@@ -90,8 +82,7 @@ const projects = [
         category: "Showcase",
         year: "2021",
         thumbnail: "https://picsum.photos/seed/09/600/800",
-        description:
-            "A study of artificial light in natural spaces. Where the digital glow meets the organic dark.",
+        description: "A study of artificial light in natural spaces. Where the digital glow meets the organic dark.",
     },
     {
         id: "10",
@@ -100,8 +91,7 @@ const projects = [
         category: "Collection",
         year: "2021",
         thumbnail: "https://picsum.photos/seed/10/600/800",
-        description:
-            "Reflections upon reflections. An infinite regress of metallic surfaces exploring the concept of the self.",
+        description: "Reflections upon reflections. An infinite regress of metallic surfaces exploring the concept of the self.",
     },
     {
         id: "11",
@@ -110,8 +100,7 @@ const projects = [
         category: "Detail",
         year: "2021",
         thumbnail: "https://picsum.photos/seed/11/600/800",
-        description:
-            "Fluid dynamics frozen in time. The moment of transition between solid and liquid states.",
+        description: "Fluid dynamics frozen in time. The moment of transition between solid and liquid states.",
     },
     {
         id: "12",
@@ -120,8 +109,7 @@ const projects = [
         category: "Showcase",
         year: "2020",
         thumbnail: "https://picsum.photos/seed/12/600/800",
-        description:
-            "Errors as aesthetic. Celebrating the glitch, the noise, and the unintended beauty of corruption.",
+        description: "Errors as aesthetic. Celebrating the glitch, the noise, and the unintended beauty of corruption.",
     },
     {
         id: "13",
@@ -130,8 +118,7 @@ const projects = [
         category: "Collection",
         year: "2020",
         thumbnail: "https://picsum.photos/seed/13/600/800",
-        description:
-            "Transparency and distortion. Viewing the world through manufactured lenses.",
+        description: "Transparency and distortion. Viewing the world through manufactured lenses.",
     },
     {
         id: "14",
@@ -140,8 +127,7 @@ const projects = [
         category: "Detail",
         year: "2020",
         thumbnail: "https://picsum.photos/seed/14/600/800",
-        description:
-            "Refraction of light through complex geometries. Splitting white light into its emotional spectrum.",
+        description: "Refraction of light through complex geometries. Splitting white light into its emotional spectrum.",
     },
     {
         id: "15",
@@ -150,8 +136,7 @@ const projects = [
         category: "Showcase",
         year: "2019",
         thumbnail: "https://picsum.photos/seed/15/600/800",
-        description:
-            "Texture in the absence of light. A tactile exploration of absolute darkness.",
+        description: "Texture in the absence of light. A tactile exploration of absolute darkness.",
     },
     {
         id: "16",
@@ -160,30 +145,30 @@ const projects = [
         category: "Collection",
         year: "2019",
         thumbnail: "https://picsum.photos/seed/16/600/800",
-        description:
-            "From dust to structure and back again. The cyclical nature of form in a digital age.",
-    }
+        description: "From dust to structure and back again. The cyclical nature of form in a digital age.",
+    },
 ]
 
 async function main() {
-    console.log('Start seeding ...')
-    for (const p of projects) {
-        const project = await prisma.project.upsert({
-            where: { slug: p.slug },
-            update: {},
-            create: p,
+    console.log('Start seeding...')
+
+    for (const project of projects) {
+        const result = await prisma.project.upsert({
+            where: { slug: project.slug },
+            update: project,
+            create: project,
         })
-        console.log(`Created project with id: ${project.id}`)
+        console.log(`Created project with id: ${result.id}`)
     }
+
     console.log('Seeding finished.')
 }
 
 main()
-    .then(async () => {
-        await prisma.$disconnect()
-    })
-    .catch(async (e) => {
+    .catch((e) => {
         console.error(e)
+        // process.exit(1) // Avoid exit to show errors if any
+    })
+    .finally(async () => {
         await prisma.$disconnect()
-        process.exit(1)
     })
